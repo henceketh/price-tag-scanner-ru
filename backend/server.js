@@ -83,9 +83,11 @@ app.post('/api/scan', optionalAuth, upload.single('image'), async (req, res) => 
       return res.status(400).json({ error: 'No image provided' });
     }
 
+    console.log('Request body:', req.body);
     const enhanceImage = req.body.enhanceImage === 'true' || req.body.enhanceImage === true;
 
     let processedBuffer = req.file.buffer;
+    let enhancedImageBase64 = null;
 
     if (enhanceImage) {
       console.log('Enhancing image quality before OCR...');
@@ -98,6 +100,7 @@ app.post('/api/scan', optionalAuth, upload.single('image'), async (req, res) => 
           .gamma(1.1)
           .png({ quality: 100 })
           .toBuffer();
+        enhancedImageBase64 = `data:image/png;base64,${processedBuffer.toString('base64')}`;
         console.log('Image enhancement complete');
       } catch (enhanceError) {
         console.log('Image enhancement failed, using original:', enhanceError.message);
@@ -231,6 +234,7 @@ app.post('/api/scan', optionalAuth, upload.single('image'), async (req, res) => 
       model,
       processingTime,
       imageEnhanced: enhanceImage,
+      enhancedImageData: enhancedImageBase64,
       timestamp: new Date().toISOString()
     });
 

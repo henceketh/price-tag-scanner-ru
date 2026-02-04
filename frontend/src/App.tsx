@@ -40,6 +40,7 @@ function AppContent() {
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
   const [enhanceImage, setEnhanceImage] = useState(false)
+  const [enhancedImage, setEnhancedImage] = useState<string | null>(null)
 
   const { user, logout, isLoading: authLoading } = useAuth()
   const { showToast } = useToast()
@@ -91,6 +92,9 @@ function AppContent() {
       const data = await scanApi.scan(imageFile, enhanceImage)
       setResult(data.text)
       setParsedData(data.parsed)
+      if (data.enhancedImageData) {
+        setEnhancedImage(data.enhancedImageData)
+      }
 
       const newResult: ScanResult = {
         id: data.id || Date.now().toString(),
@@ -114,6 +118,7 @@ function AppContent() {
     setImageFile(null)
     setResult(null)
     setParsedData(null)
+    setEnhancedImage(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -355,6 +360,23 @@ function AppContent() {
                         {parsedData.barcode}
                       </div>
                     )}
+                  </div>
+                )}
+                {enhancedImage && (
+                  <div className="enhanced-preview">
+                    <div className="enhanced-preview-header">
+                      <span className="results-title">Улучшенное изображение</span>
+                    </div>
+                    <div className="enhanced-preview-images">
+                      <div className="enhanced-preview-item">
+                        <span className="enhanced-preview-label">Оригинал</span>
+                        <img src={image || ''} alt="Original" />
+                      </div>
+                      <div className="enhanced-preview-item">
+                        <span className="enhanced-preview-label">Улучшено</span>
+                        <img src={enhancedImage} alt="Enhanced" />
+                      </div>
+                    </div>
                   </div>
                 )}
                 <div className="results-header">
