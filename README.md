@@ -15,9 +15,8 @@
 - **Поиск и фильтры** — фильтрация по тексту, дате, цене, штрих-коду, акциям
 - **Аутентификация** — опциональная регистрация/вход для привязки данных к аккаунту
 
-<img width="2544" height="1290" alt="Screenshot 2026-02-03 013352" src="https://github.com/user-attachments/assets/229c63c7-7f66-448f-8b9d-70085f1d179f" />
-<img width="1435" height="706" alt="Screenshot 2026-02-04 174735" src="https://github.com/user-attachments/assets/eda4110c-b7d8-4562-8345-83baec9e3fb7" />
-<img width="595" height="1304" align-items="center" alt="Screenshot 2026-02-03 013418" src="https://github.com/user-attachments/assets/65bd157c-08b3-448f-8002-6364dac69c48" />
+<img width="1388" height="1187" alt="Screenshot 2026-02-03 013413" src="https://github.com/user-attachments/assets/0d996b65-3055-4cbf-868f-ee87f41d1547" />
+<img width="595" height="1304" alt="Screenshot 2026-02-03 013418" src="https://github.com/user-attachments/assets/eac4dcb9-fccb-4b40-8104-7c0e692931aa" />
 
 ## Технологии
 
