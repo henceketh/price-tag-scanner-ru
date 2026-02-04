@@ -135,5 +135,6 @@ Swagger UI позволяет:
 - Изучать схемы запросов и ответов
 - Авторизоваться с помощью JWT токена
 
-<img width="2544" height="1302" alt="Screenshot 2026-02-04 163259" src="https://github.com/user-attachments/assets/af5b6c5a-6d63-4420-a0f4-9f5159b59db5" />
-<img width="1418" height="1166" alt="Screenshot 2026-02-04 163303" src="https://github.com/user-attachments/assets/525627d8-d6d3-4ecc-9748-9df09985db61" />
+<img width="2544" height="1302" alt="Screenshot 2026-02-04 163259" src="https://github.com/user-attachments/assets/8b7f1a50-2afc-400f-a01c-2e6ffc1e2c63" />
+<img width="1418" height="1166" alt="Screenshot 2026-02-04 163303" src="https://github.com/user-attachments/assets/aa475ec3-20c9-44cf-8e9e-a69491be8f86" />
+
