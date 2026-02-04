@@ -39,6 +39,7 @@ function AppContent() {
   const [showCamera, setShowCamera] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
+  const [enhanceImage, setEnhanceImage] = useState(false)
 
   const { user, logout, isLoading: authLoading } = useAuth()
   const { showToast } = useToast()
@@ -87,7 +88,7 @@ function AppContent() {
     setIsLoading(true)
 
     try {
-      const data = await scanApi.scan(imageFile)
+      const data = await scanApi.scan(imageFile, enhanceImage)
       setResult(data.text)
       setParsedData(data.parsed)
 
@@ -297,6 +298,16 @@ function AppContent() {
               </button>
             )}
           </div>
+
+          <label className="enhance-toggle">
+            <input
+              type="checkbox"
+              checked={enhanceImage}
+              onChange={(e) => setEnhanceImage(e.target.checked)}
+            />
+            <span className="enhance-toggle-slider"></span>
+            <span className="enhance-toggle-label">Улучшить качество</span>
+          </label>
         </section>
 
         <section className="results-section">

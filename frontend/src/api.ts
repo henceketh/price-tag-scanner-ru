@@ -57,9 +57,12 @@ export const authApi = {
 
 // Scan API
 export const scanApi = {
-  scan: async (imageFile: File) => {
+  scan: async (imageFile: File, enhanceImage: boolean = false) => {
     const formData = new FormData();
     formData.append('image', imageFile);
+    if (enhanceImage) {
+      formData.append('enhanceImage', 'true');
+    }
 
     const token = getToken();
     const headers: HeadersInit = {};
