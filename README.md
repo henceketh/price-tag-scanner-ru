@@ -39,13 +39,6 @@
 - GitHub Actions (CI/CD)
 - Nginx (production frontend)
 
-## Требования
-
-- Node.js 18+
-- MongoDB
-- [Ollama](https://ollama.ai/) с моделью `llava:34b`
-- Docker (опционально)
-
 ## Установка
 
 1. Клонируйте репозиторий:
