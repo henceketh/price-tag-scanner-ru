@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: price-scanner-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: priceTagRecognizer
+    networks:
+      - price-scanner-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: price-scanner-backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - MONGODB_URI=mongodb://mongodb:27017/priceTagRecognizer
+      - OLLAMA_HOST=http://host.docker.internal:11434
+      - JWT_SECRET=${JWT_SECRET:-your-secret-key-change-me}
+    depends_on:
+      - mongodb
+    networks:
+      - price-scanner-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: price-scanner-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - price-scanner-network
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  price-scanner-network:
+    driver: bridge
