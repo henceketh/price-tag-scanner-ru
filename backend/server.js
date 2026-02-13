@@ -38,6 +38,8 @@ const ollama = new Ollama({
   fetch: (url, options) => undiciFetch(url, { ...options, dispatcher: ollamaAgent })
 });
 
+const MODEL = 'qwen2.5vl:72b';
+
 connectDB();
 
 app.use(cors());
@@ -133,7 +135,7 @@ app.post('/api/scan', optionalAuth, upload.single('image'), async (req, res) => 
     console.log(`Base64 length: ${imageBase64.length}`);
     console.log(`Image enhanced: ${enhanceImage}`);
 
-    const model = 'qwen3-vl:235b'
+    const model = MODEL
 
     const prompt = `You're an OCR system for price tags. Extract the text from the price tag image and print it strictly according to the template. Write ONLY what you see. Don't think about it.
 
@@ -166,6 +168,7 @@ Rules:
       keep_alive: -1,
       options: {
         temperature: 0.1,
+        num_ctx: 4096,
       }
     });
 
@@ -269,11 +272,30 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message });
 });
 
+async function unloadModel() {
+  console.log(`Unloading model ${MODEL}...`);
+  try {
+    await ollama.generate({ model: MODEL, prompt: '', keep_alive: 0 });
+    console.log('Model unloaded');
+  } catch (e) {
+    console.warn('Model unload failed:', e.message);
+  }
+}
+
+async function gracefulShutdown(signal) {
+  console.log(`\nReceived ${signal}, shutting down...`);
+  await unloadModel();
+  process.exit(0);
+}
+
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+
 app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
   try {
-    console.log('Warming up model qwen3-vl:235b...');
-    await ollama.generate({ model: 'qwen3-vl:235b', prompt: '', keep_alive: -1 });
+    console.log(`Warming up model ${MODEL}...`);
+    await ollama.generate({ model: MODEL, prompt: '', keep_alive: -1 });
     console.log('Model loaded and ready');
   } catch (e) {
     console.warn('Model warmup failed:', e.message);
