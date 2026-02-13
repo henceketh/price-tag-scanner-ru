@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import sharp from 'sharp';
 import swaggerUi from 'swagger-ui-express';
+import { fetch as undiciFetch, Agent } from 'undici';
 
 import { connectDB } from './db.js';
 import { optionalAuth } from './middleware/auth.js';
@@ -26,8 +27,15 @@ dotenv.config({ path: join(__dirname, '..', '.env') });
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+const ollamaAgent = new Agent({
+  headersTimeout: 10 * 60 * 1000,
+  bodyTimeout: 10 * 60 * 1000,
+  connectTimeout: 30 * 1000,
+});
+
 const ollama = new Ollama({
-  host: process.env.OLLAMA_HOST
+  host: process.env.OLLAMA_HOST,
+  fetch: (url, options) => undiciFetch(url, { ...options, dispatcher: ollamaAgent })
 });
 
 connectDB();
@@ -125,27 +133,28 @@ app.post('/api/scan', optionalAuth, upload.single('image'), async (req, res) => 
     console.log(`Base64 length: ${imageBase64.length}`);
     console.log(`Image enhanced: ${enhanceImage}`);
 
-    const model = 'qwen2.5vl:72b'
+    const model = 'qwen3-vl:235b'
 
-    const prompt = `Посмотри на предоставленное изображение ценника/этикетки товара. Ты — система оптического распознавания текста (OCR). Твоя задача — извлечь ВСЕ текстовые данные с этого ценника/этикетки товара.
+    const prompt = `You're an OCR system for price tags. Extract the text from the price tag image and print it strictly according to the template. Write ONLY what you see. Don't think about it.
 
-Внимательно проанализируй изображение и извлеки:
-1. Название товара/продукта
-2. Цену (все цены, если их несколько: обычная, акционная, цена за единицу)
-3. Единицы измерения (кг, шт, л и т.д.)
-4. Штрих-код (если виден)
-5. Производителя/бренд
-6. Состав/ингредиенты (если указаны)
-7. Срок годности (если указан)
-8. Любую другую текстовую информацию
+Name: [full product name]
+Brand: [manufacturer/brand, if specified]
+Price: [number] rub
+Old price: [number] RUB (if there is a promotion/discount)
+Unit price: [number] RUB/[kg|piece|L|g|ml|pack]
+Discount: -[number]% (if specified)
+Unit: per [kg|piece|L|g|ml|pack]
+Barcode: [numbers]
+Composition: [text, if specified]
+Expiration date: [text, if specified]
+Additionally: [other text on the price tag]
 
-Формат ответа:
-- Выведи данные структурированно
-- Используй маркированный список
-- Цены выдели отдельно
-- Если какой-то текст не читается чётко, укажи это
-
-Отвечай ТОЛЬКО на русском языке.`;
+Rules:
+- Write prices as numbers with pennies: 123.45 rub
+- If there is a promotion, be sure to specify the old price and the word "discount" or "promotion".
+- Barcode — only numbers without spaces
+- Skip lines for which there is no data in the image.
+- Answer ONLY in Russian`;
 
     console.log(`Processing image with model: ${model}`);
     console.log(`Image size: ${req.file.size} bytes`);
@@ -154,6 +163,7 @@ app.post('/api/scan', optionalAuth, upload.single('image'), async (req, res) => 
       model: model,
       prompt: prompt,
       images: [imageBase64],
+      keep_alive: -1,
       options: {
         temperature: 0.1,
       }
@@ -259,6 +269,13 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
+  try {
+    console.log('Warming up model qwen3-vl:235b...');
+    await ollama.generate({ model: 'qwen3-vl:235b', prompt: '', keep_alive: -1 });
+    console.log('Model loaded and ready');
+  } catch (e) {
+    console.warn('Model warmup failed:', e.message);
+  }
 });
